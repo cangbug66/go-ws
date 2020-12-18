@@ -48,7 +48,17 @@ func (engine *Engine) wsServe(w http.ResponseWriter, r *http.Request) {
 
 func (engine *Engine) ReadMessage(conn *websocket.Conn,w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
-
+	conn.SetCloseHandler(func(code int, text string) error {
+		if engine.OnFunc.OnCloseFunc != nil {
+			context := NewContext(conn,w,r,NewMessage(0,[]byte{}))
+			engine.OnFunc.OnCloseFunc(context)
+		}
+		return nil
+	})
+	if engine.OnFunc.OnOpenFunc != nil {
+		context := NewContext(conn,w,r,NewMessage(0,[]byte{}))
+		engine.OnFunc.OnOpenFunc(context)
+	}
 	for {
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
@@ -59,7 +69,7 @@ func (engine *Engine) ReadMessage(conn *websocket.Conn,w http.ResponseWriter, r 
 		context := NewContext(conn,w,r,NewMessage(messageType,message))
 		if(engine.OnFunc.OnMessageFunc != nil){
 			engine.OnFunc.OnMessageFunc(context)
-			return
+			continue
 		}
 		engine.router.handle(engine,context)
 	}

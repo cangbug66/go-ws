@@ -22,7 +22,6 @@ type Context struct {
 	handlers []HandlerFunc
 	index int
 	Action string
-	Params map[string]string
 	Message *Message
 }
 
@@ -32,7 +31,6 @@ func NewContext(conn *websocket.Conn,w http.ResponseWriter, r *http.Request,mess
 		Writer:w,
 		Req:r,
 		index:-1,
-		Params: map[string]string{},
 		Message:message,
 		handlers:[]HandlerFunc{},
 	}

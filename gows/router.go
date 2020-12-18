@@ -35,30 +35,18 @@ func parsePattern(pattern string) []string {
 
 func (r *router) addRoute(pattern string,handler HandlerFunc)  {
 	parts:=parsePattern(pattern)
-	log.Printf("Route %s", pattern)
-	fmt.Println("parts",parts)
+	log.Printf("Route: %s", pattern)
 	r.root.insert(pattern,parts,0)
 	r.handlers[pattern] = handler
 }
 
-func (r *router) getRoute(pattern string) (*node,map[string]string) {
+func (r *router) getRoute(pattern string) *node {
 	searchParts := parsePattern(pattern)
-	params := map[string]string{}
 	n:=r.root.search(searchParts,0)
 	if n!=nil{
-		parts:=parsePattern(n.pattern)
-		for index,part:=range parts{
-			if part[0] == ':'{
-				params[part[1:]] = searchParts[index]
-			}
-			if part[0] == '*' && len(part) > 1{
-				params[part[1:]] = strings.Join(searchParts[index:],"/")
-				break
-			}
-		}
-		return n, params
+		return n
 	}
-	return nil,nil
+	return nil
 }
 
 func (r *router) handle(engine *Engine,c *Context) {
@@ -66,7 +54,7 @@ func (r *router) handle(engine *Engine,c *Context) {
 	Data:=c.Message.Data
 	form:=&WsForm{}
 	if err:=GetForm(Data,form);err!=nil{
-		log.Println("json解析失败,参数:", string(Data))
+		log.Println("json解析失败:", string(Data))
 		return
 	}
 	action := form.Action
@@ -74,7 +62,7 @@ func (r *router) handle(engine *Engine,c *Context) {
 		c.String("action is null")
 		return
 	}
-	n,params:=r.getRoute(action)
+	n:=r.getRoute(action)
 
 	var middlewares []HandlerFunc
 	for _,group:=range engine.groups{
@@ -84,7 +72,6 @@ func (r *router) handle(engine *Engine,c *Context) {
 	}
 	c.handlers = middlewares
 	if n!=nil{
-		c.Params = params
 		if hanlder,ok := r.handlers[action];ok{
 			c.handlers = append(c.handlers,hanlder)
 		}
