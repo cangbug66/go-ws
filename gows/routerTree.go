@@ -3,13 +3,12 @@ package gows
 import "strings"
 
 type node struct {
-	pattern string // 待匹配路由，例如 /p/:lang
-	part string // 路由中的一部分，例如 :lang
-	children []*node // 子节点，例如 [doc, tutorial, intro]
-	isWild bool // 是否精确匹配，part 含有 : 或 * 时为true
+	path string
+	part string
+	children []*node
+	isWild bool
 }
 
-// 第一个匹配成功的节点，用于插入
 func (n *node) matchChild(part string) *node {
 	for _,child:=range n.children{
 		if child.part == part || child.isWild{
@@ -29,9 +28,9 @@ func (n *node) matchChildren(part string) []*node{
 	return nodes
 }
 
-func (n *node) insert(pattern string,parts []string,height int){
+func (n *node) insert(path string,parts []string,height int){
 	if len(parts) == height{
-		n.pattern = pattern
+		n.path = path
 		return
 	}
 
@@ -42,12 +41,12 @@ func (n *node) insert(pattern string,parts []string,height int){
 		child = &node{part:part,isWild:isWild}
 		n.children = append(n.children,child)
 	}
-	child.insert(pattern,parts,height+1)
+	child.insert(path,parts,height+1)
 }
 
 func (n *node) search(parts []string,height int) *node{
 	if(len(parts) == height || strings.HasPrefix(n.part,"*")){
-		if n.pattern == ""{
+		if n.path == ""{
 			return nil
 		}
 		return n

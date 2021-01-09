@@ -22,11 +22,11 @@ func (group *RouterGroup) Use(middlewares  ...HandlerFunc){
 	group.middlewares = append(group.middlewares,middlewares...)
 }
 
-func (group *RouterGroup) addRoute(pattern string, handler HandlerFunc) {
-	pattern = group.prefix + pattern
-	group.engine.router.addRoute(pattern,handler)
+func (group *RouterGroup) addRoute(path string, handler HandlerFunc) {
+	path = group.prefix + path
+	group.engine.router.addRoute(path,handler)
 }
 
-func (group *RouterGroup) Route(pattern string, handler HandlerFunc)  {
-	group.addRoute(pattern,handler)
+func (group *RouterGroup) Route(path string, handler HandlerFunc)  {
+	group.addRoute(path,handler)
 }

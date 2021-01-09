@@ -18,8 +18,8 @@ func newRouter() *router {
 	}
 }
 
-func parsePattern(pattern string) []string {
-	vs:=strings.Split(pattern,"/")
+func parsePath(path string) []string {
+	vs:=strings.Split(path,"/")
 
 	parts := []string{}
 	for _,item:=range vs{
@@ -33,15 +33,15 @@ func parsePattern(pattern string) []string {
 	return parts
 }
 
-func (r *router) addRoute(pattern string,handler HandlerFunc)  {
-	parts:=parsePattern(pattern)
-	log.Printf("Route: %s", pattern)
-	r.root.insert(pattern,parts,0)
-	r.handlers[pattern] = handler
+func (r *router) addRoute(path string,handler HandlerFunc)  {
+	parts:=parsePath(path)
+	log.Printf("Route: %s", path)
+	r.root.insert(path,parts,0)
+	r.handlers[path] = handler
 }
 
-func (r *router) getRoute(pattern string) *node {
-	searchParts := parsePattern(pattern)
+func (r *router) getRoute(path string) *node {
+	searchParts := parsePath(path)
 	n:=r.root.search(searchParts,0)
 	if n!=nil{
 		return n
